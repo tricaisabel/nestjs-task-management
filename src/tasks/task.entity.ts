@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/auth/user.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TaskPriority, TaskStatus, TaskType } from './task.enum';
 
 @Entity('Task')
@@ -26,4 +27,10 @@ export class Task {
 
   @Column()
   createdOn: Date;
+
+  @ManyToOne((_type) => User, (user) => user.createdTasks, { eager: true })
+  createdBy: User;
+
+  @ManyToOne((_type) => User, (user) => user.assignedTasks, { eager: true })
+  assignedTo: User;
 }

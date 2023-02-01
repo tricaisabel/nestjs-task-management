@@ -1,5 +1,6 @@
 import { stringify } from 'querystring';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Task } from 'src/tasks/task.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('User')
 export class User {
@@ -17,4 +18,10 @@ export class User {
 
   @Column()
   role: string;
+
+  @OneToMany((_type) => Task, (task) => task.createdBy, { eager: false })
+  createdTasks: Task[];
+
+  @OneToMany((_type) => Task, (task) => task.assignedTo, { eager: false })
+  assignedTasks: Task[];
 }
