@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { TaskStatus } from './task.enum';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
@@ -9,9 +13,12 @@ import { User } from 'src/auth/user.entity';
 import { AssignToDto } from './dto/update-task.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { BoardService } from 'src/board/board.service';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class TasksService {
+  private logger = new Logger('TaskController', { timestamp: true });
+
   //inject the task repository (also added as an import)
   constructor(
     @InjectRepository(Task)
@@ -38,7 +45,7 @@ export class TasksService {
   }
 
   async getAllTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
-    const { status, search } = filterDto;
+    const { status, search, assignedTo } = filterDto;
 
     const query = this.taskRepository.createQueryBuilder('task');
 
@@ -53,10 +60,19 @@ export class TasksService {
       );
     }
 
-    query.leftJoinAndSelect('task.createdBy', 'user');
-    const tasks = await query.getMany();
+    if (assignedTo) {
+      query.andWhere('task.assignedTo.id = :assignedTo', { assignedTo });
+    }
 
-    return tasks;
+    query.leftJoinAndSelect('task.createdBy', 'user');
+
+    try {
+      const tasks = await query.getMany();
+      return tasks;
+    } catch (error) {
+      this.logger.error(`Failed to get the tasks`, error.stack);
+      throw new InternalServerErrorException();
+    }
   }
 
   async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
