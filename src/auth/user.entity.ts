@@ -1,8 +1,7 @@
-import { stringify } from 'querystring';
 import { Task } from 'src/tasks/task.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('User')
+@Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;

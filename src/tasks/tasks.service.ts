@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/user.entity';
+import { AssignToDto } from './dto/update-task.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class TasksService {
@@ -13,6 +15,7 @@ export class TasksService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
+    private authService: AuthService,
   ) {}
 
   async getTaskById(id: string): Promise<Task> {
@@ -25,6 +28,9 @@ export class TasksService {
     if (!found) {
       throw new NotFoundException(`Task with id ${id} not found`);
     }
+
+    delete found.createdBy.password;
+    if (found.assignedTo) delete found.assignedTo.password;
 
     return found;
   }
@@ -44,6 +50,8 @@ export class TasksService {
         { search: `%${search}%` },
       );
     }
+
+    query.leftJoinAndSelect('task.createdBy', 'user');
     const tasks = await query.getMany();
 
     return tasks;
@@ -77,8 +85,26 @@ export class TasksService {
 
   async updateTaskById(id: string, status: TaskStatus): Promise<Task> {
     const task = await this.getTaskById(id);
-    task.status = status;
-    await this.taskRepository.save(task);
-    return task;
+    if (task) {
+      task.status = status;
+      await this.taskRepository.save(task);
+      return task;
+    } else {
+      throw new NotFoundException("There aren't any tasks with the given id");
+    }
+  }
+
+  async assignTaskById(id: string, assignToDto: AssignToDto): Promise<Task> {
+    const { assignedTo } = assignToDto;
+    const user: User = await this.authService.userExists(assignedTo);
+
+    const task = await this.getTaskById(id);
+    if (task) {
+      task.assignedTo = user;
+      await this.taskRepository.save(task);
+      return task;
+    } else {
+      throw new NotFoundException("There aren't any tasks with the given id");
+    }
   }
 }

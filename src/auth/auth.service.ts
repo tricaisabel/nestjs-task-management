@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -57,6 +58,15 @@ export class AuthService {
       return { accessToken };
     } else {
       throw new UnauthorizedException('Please check your login credentials');
+    }
+  }
+
+  async userExists(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ id });
+    if (user) {
+      return user;
+    } else {
+      throw new NotFoundException(`There aren't any users with the given id`);
     }
   }
 }
