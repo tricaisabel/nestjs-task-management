@@ -1,11 +1,5 @@
 import { User } from 'src/auth/user.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TaskPriority, TaskStatus, TaskType } from './task.enum';
 
 @Entity()
