@@ -26,7 +26,12 @@ export class BoardService {
   }
 
   async getBoardById(id: string): Promise<Board> {
-    const board = await this.boardRepository.findOne({ id });
+    const board = await this.boardRepository.findOne({
+      where: {
+        id,
+      },
+      relations: ['tasks'],
+    });
     if (board) {
       delete board.createdBy.password;
       return board;

@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Board } from 'src/board/board.entity';
 import { Task } from 'src/tasks/task.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
@@ -11,6 +12,7 @@ export class User {
   username: string;
 
   @Column()
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @Column()
@@ -27,4 +29,8 @@ export class User {
 
   @OneToMany((_type) => Task, (task) => task.createdBy, { eager: false })
   createdBoards: Board[];
+
+  constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
+  }
 }

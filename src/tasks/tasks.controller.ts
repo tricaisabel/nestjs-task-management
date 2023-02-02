@@ -8,6 +8,8 @@ import {
   Patch,
   Query,
   UseGuards,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -20,6 +22,7 @@ import { GetUser } from 'src/auth/get-user.decorator';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
+@UseInterceptors(ClassSerializerInterceptor)
 export class TasksController {
   //creeaza o proprietate a clasei numita tasksService
   //ii asigneaza valoarea lui TasksService
