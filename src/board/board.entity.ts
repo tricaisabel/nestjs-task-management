@@ -3,6 +3,7 @@ import { Task } from 'src/tasks/task.entity';
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -19,6 +20,10 @@ export class Board {
 
   @ManyToOne((_type) => User, (user) => user.createdBoards, { eager: true })
   createdBy: User;
+
+  @ManyToMany(() => User)
+  @JoinTable({ name: 'team' })
+  team: User[];
 
   @OneToMany((_type) => Task, (task) => task.board, { eager: false })
   tasks: Task[];
