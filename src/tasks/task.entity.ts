@@ -1,4 +1,5 @@
 import { User } from 'src/auth/user.entity';
+import { Board } from 'src/board/board.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TaskPriority, TaskStatus, TaskType } from './task.enum';
 
@@ -33,4 +34,7 @@ export class Task {
 
   @ManyToOne((_type) => User, (user) => user.assignedTasks, { eager: true })
   assignedTo: User;
+
+  @ManyToOne((_type) => Board, (board) => board.tasks, { eager: true })
+  board: Board;
 }

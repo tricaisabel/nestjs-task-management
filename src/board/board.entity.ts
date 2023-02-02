@@ -1,5 +1,13 @@
 import { User } from 'src/auth/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Task } from 'src/tasks/task.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Board {
@@ -11,4 +19,7 @@ export class Board {
 
   @ManyToOne((_type) => User, (user) => user.createdBoards, { eager: true })
   createdBy: User;
+
+  @OneToMany((_type) => Task, (task) => task.board, { eager: false })
+  tasks: Task[];
 }

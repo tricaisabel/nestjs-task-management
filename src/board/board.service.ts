@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/user.entity';
 import { Repository } from 'typeorm';
@@ -23,5 +23,15 @@ export class BoardService {
     });
     await this.boardRepository.save(board);
     return board;
+  }
+
+  async getBoardById(id: string): Promise<Board> {
+    const board = await this.boardRepository.findOne({ id });
+    if (board) {
+      delete board.createdBy.password;
+      return board;
+    } else {
+      throw new NotFoundException(`There aren't any boards with the given id`);
+    }
   }
 }

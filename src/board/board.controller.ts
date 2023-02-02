@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
@@ -19,5 +19,10 @@ export class BoardController {
     @GetUser() user: User,
   ): Promise<Board> {
     return this.boardService.createBoard(createBoardDto, user);
+  }
+
+  @Get('/:id')
+  getBoardById(@Param('id') id: string): Promise<Board> {
+    return this.boardService.getBoardById(id);
   }
 }

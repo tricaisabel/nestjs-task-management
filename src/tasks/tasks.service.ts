@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/auth/user.entity';
 import { AssignToDto } from './dto/update-task.dto';
 import { AuthService } from 'src/auth/auth.service';
+import { BoardService } from 'src/board/board.service';
 
 @Injectable()
 export class TasksService {
@@ -16,6 +17,7 @@ export class TasksService {
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
     private authService: AuthService,
+    private boardService: BoardService,
   ) {}
 
   async getTaskById(id: string): Promise<Task> {
@@ -58,7 +60,10 @@ export class TasksService {
   }
 
   async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
-    const { title, description, type, priority, deadline } = createTaskDto;
+    const { title, description, type, priority, deadline, boardId } =
+      createTaskDto;
+
+    const board = await this.boardService.getBoardById(boardId);
     const task = this.taskRepository.create({
       title,
       description,
@@ -69,6 +74,7 @@ export class TasksService {
       createdOn: new Date(),
       createdBy: user,
       assignedTo: null,
+      board,
     });
 
     await this.taskRepository.save(task);

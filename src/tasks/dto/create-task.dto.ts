@@ -1,4 +1,10 @@
-import { IsDate, IsDateString, IsEnum, IsNotEmpty } from 'class-validator';
+import {
+  IsDate,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsUUID,
+} from 'class-validator';
 import { type } from 'os';
 import { TaskPriority, TaskStatus, TaskType } from '../task.enum';
 
@@ -17,4 +23,7 @@ export class CreateTaskDto {
 
   @IsDateString()
   deadline: string;
+
+  @IsUUID()
+  boardId: string;
 }

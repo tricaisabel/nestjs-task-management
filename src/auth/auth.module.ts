@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
+  //ce vei folosi in service
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
@@ -18,8 +19,11 @@ import { JwtStrategy } from './jwt.strategy';
     }),
     TypeOrmModule.forFeature([User]),
   ],
+  //ce vei folosi in controller/ declarare service
   providers: [AuthService, JwtStrategy],
+  //declarare controller
   controllers: [AuthController],
+  //ce se importa automat in modulele care importa modulul asta
   exports: [JwtStrategy, PassportModule, AuthService],
 })
 export class AuthModule {}
