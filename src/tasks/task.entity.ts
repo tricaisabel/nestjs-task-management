@@ -35,6 +35,6 @@ export class Task {
   @ManyToOne((_type) => User, (user) => user.assignedTasks, { eager: true })
   assignedTo: User;
 
-  @ManyToOne((_type) => Board, (board) => board.tasks, { eager: true })
+  @ManyToOne((_type) => Board, (board) => board.tasks, { eager: false })
   board: Board;
 }

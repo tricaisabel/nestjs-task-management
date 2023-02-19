@@ -23,7 +23,7 @@ export class BoardService {
     const board = await this.getBoardById(idBoard);
     const authUser = await this.authService.userExists(idUser);
     const found = board.team.find((user) => user.id === authUser.id);
-    if (!found) {
+    if (!found && board.createdBy.id !== idUser) {
       throw new NotFoundException();
     }
   }
@@ -55,6 +55,13 @@ export class BoardService {
     } else {
       throw new NotFoundException(`There aren't any boards with the given id`);
     }
+  }
+
+  async getBoards(): Promise<Board[]> {
+    const boards = await this.boardRepository.find({
+      relations: ['tasks', 'team'],
+    });
+    return boards;
   }
 
   async addUserToBoardTeam(

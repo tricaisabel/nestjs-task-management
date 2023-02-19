@@ -15,9 +15,6 @@ export class AuthCredentialsDto {
   username: string;
 
   @IsString()
-  @MinLength(8)
-  @MaxLength(32)
-  @IsStrongPassword()
   password: string;
 
   @IsEnum(UserRoles)
