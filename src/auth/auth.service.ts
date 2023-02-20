@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { SignInCredentialsDto } from './dto/signin-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class AuthService {
@@ -73,5 +75,10 @@ export class AuthService {
     } else {
       throw new NotFoundException(`There aren't any users with the given id`);
     }
+  }
+
+  async getUsers(): Promise<User[]> {
+    const users = await this.usersRepository.find();
+    return users;
   }
 }
