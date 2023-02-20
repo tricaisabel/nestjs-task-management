@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/user.entity';
-import { AssignToDto } from './dto/update-task.dto';
+import { AssignToDto, FullTaskUpdateDto } from './dto/update-task.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { BoardService } from 'src/board/board.service';
 import { Logger } from '@nestjs/common';
@@ -123,6 +123,33 @@ export class TasksService {
     const task = await this.getTaskById(id);
     if (task) {
       task.assignedTo = user;
+      await this.taskRepository.save(task);
+      return task;
+    } else {
+      throw new NotFoundException("There aren't any tasks with the given id");
+    }
+  }
+
+  async updateTask(
+    id: string,
+    newProperties: FullTaskUpdateDto,
+  ): Promise<Task> {
+    let task = await this.getTaskById(id);
+    if (task) {
+      console.log(newProperties.assignedTo);
+      if (newProperties.assignedTo !== 'Unassigned') {
+        const user: User = await this.authService.userExists(
+          newProperties.assignedTo,
+        );
+        task.assignedTo = user;
+      }
+
+      task.deadline = new Date(newProperties.deadline);
+      task.description = newProperties.description;
+      task.priority = newProperties.priority;
+      task.status = newProperties.status;
+      task.title = newProperties.title;
+      task.type = newProperties.type;
       await this.taskRepository.save(task);
       return task;
     } else {

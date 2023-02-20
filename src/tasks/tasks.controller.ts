@@ -14,7 +14,11 @@ import {
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
-import { AssignToDto, UpdateTaskStatusDto } from './dto/update-task.dto';
+import {
+  AssignToDto,
+  FullTaskUpdateDto,
+  UpdateTaskStatusDto,
+} from './dto/update-task.dto';
 import { Task } from './task.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/auth/user.entity';
@@ -65,6 +69,14 @@ export class TasksController {
   @Delete('/:id')
   deleteTaskById(@Param('id') id: string): Promise<void> {
     return this.tasksService.deleteTaskById(id);
+  }
+
+  @Patch('/:id')
+  updateTask(
+    @Param('id') id: string,
+    @Body() newProperties: FullTaskUpdateDto,
+  ): Promise<Task> {
+    return this.tasksService.updateTask(id, newProperties);
   }
 
   @Patch('/:id/status')
