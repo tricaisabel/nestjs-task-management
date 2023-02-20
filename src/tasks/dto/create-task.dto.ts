@@ -5,7 +5,6 @@ import {
   IsNotEmpty,
   IsUUID,
 } from 'class-validator';
-import { type } from 'os';
 import { TaskPriority, TaskStatus, TaskType } from '../task.enum';
 
 export class CreateTaskDto {

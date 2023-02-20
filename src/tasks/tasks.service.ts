@@ -83,7 +83,7 @@ export class TasksService {
     const task = this.taskRepository.create({
       title,
       description,
-      status: TaskStatus.OPEN,
+      status: TaskStatus.NEW,
       type,
       priority,
       deadline: new Date(deadline),

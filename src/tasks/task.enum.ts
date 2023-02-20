@@ -1,13 +1,15 @@
 export enum TaskStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
+  NEW = 'NEW',
+  ACTIVE = 'ACTIVE',
   DONE = 'DONE',
+  BLOCKED = 'BLOCKED',
 }
 
 export enum TaskType {
   BUG = 'BUG',
   USER_STORY = 'USER_STORY',
   EPIC = 'EPIC',
+  ISSUE = 'ISSUE',
 }
 
 export enum TaskPriority {
