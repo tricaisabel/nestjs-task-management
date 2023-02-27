@@ -7,14 +7,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { SignInCredentialsDto } from './dto/signin-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
-import { AuthGuard } from '@nestjs/passport';
 import { FileService } from 'src/files/file.service';
 
 @Injectable()
@@ -24,6 +23,7 @@ export class AuthService {
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
     private readonly databaseFilesService: FileService,
+    private connection: Connection,
   ) {}
 
   async signUp(
@@ -85,13 +85,42 @@ export class AuthService {
   }
 
   async addAvatar(userId: string, imageBuffer: Buffer, filename: string) {
-    const avatar = await this.databaseFilesService.uploadDatabaseFile(
-      imageBuffer,
-      filename,
-    );
-    await this.usersRepository.update(userId, {
-      avatarId: avatar.id,
-    });
-    return avatar;
+    //set up transaction
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const user = await queryRunner.manager.findOne(User, userId);
+      const currentAvatarId = user.avatarId;
+
+      //add new avatar to files and update avatar id
+      const avatar = await this.databaseFilesService.uploadDatabaseFile(
+        imageBuffer,
+        filename,
+        queryRunner,
+      );
+      await queryRunner.manager.update(User, userId, {
+        avatarId: avatar.id,
+      });
+
+      //if an avatar already exists, delete it
+      if (currentAvatarId) {
+        await this.databaseFilesService.deleteFile(
+          currentAvatarId,
+          queryRunner,
+        );
+      }
+
+      await queryRunner.commitTransaction();
+
+      return avatar;
+    } catch (err) {
+      //rollback if something goes wrong
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(err);
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
