@@ -4,13 +4,17 @@ import {
   Controller,
   Get,
   Post,
+  Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { SignInCredentialsDto } from './dto/signin-credentials.dto';
+import { GetUser } from './get-user.decorator';
 import { User } from './user.entity';
 
 @Controller('auth')
@@ -36,5 +40,15 @@ export class AuthController {
     @Body() signInCredentialsDto: SignInCredentialsDto,
   ): Promise<{ user: User; accessToken: string }> {
     return this.authService.signIn(signInCredentialsDto);
+  }
+
+  @Post('avatar')
+  @UseGuards(AuthGuard())
+  @UseInterceptors(FileInterceptor('file'))
+  async addAvatar(
+    @GetUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.authService.addAvatar(user.id, file.buffer, file.originalname);
   }
 }

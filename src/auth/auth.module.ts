@@ -6,6 +6,7 @@ import { User } from './user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   //ce vei folosi in service
@@ -18,6 +19,7 @@ import { JwtStrategy } from './jwt.strategy';
       },
     }),
     TypeOrmModule.forFeature([User]),
+    FilesModule,
   ],
   //ce vei folosi in controller/ declarare service
   providers: [AuthService, JwtStrategy],

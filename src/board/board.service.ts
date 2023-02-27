@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -18,13 +19,15 @@ export class BoardService {
     private authService: AuthService,
   ) {}
 
-  async isPartOfBoardTeam(idUser: string, idBoard: string): Promise<void> {
+  async isPartOfBoardTeam(idUser: string, idBoard: string): Promise<boolean> {
     console.log(idUser, idBoard);
     const board = await this.getBoardById(idBoard);
     const authUser = await this.authService.userExists(idUser);
     const found = board.team.find((user) => user.id === authUser.id);
     if (!found && board.createdBy.id !== idUser) {
-      throw new NotFoundException();
+      return false;
+    } else {
+      return true;
     }
   }
 
@@ -68,15 +71,21 @@ export class BoardService {
     idUser: string,
     idBoard: string,
     user: User,
-  ): Promise<void> {
+  ): Promise<User | void> {
     const newUser = await this.authService.userExists(idUser);
     const board = await this.getBoardById(idBoard);
+    const isPartOfTeam = await this.isPartOfBoardTeam(idUser, idBoard);
+    if (isPartOfTeam === true) {
+      throw new BadRequestException('The user is already part of that team');
+    }
 
-    if (board.createdBy.id === user.id) board.team.push(newUser);
-    else
+    if (board.createdBy.id === user.id) {
+      board.team.push(newUser);
+      await this.boardRepository.save(board);
+      return newUser;
+    } else
       throw new UnauthorizedException(
         'Users can be added only by the project creator',
       );
-    await this.boardRepository.save(board);
   }
 }

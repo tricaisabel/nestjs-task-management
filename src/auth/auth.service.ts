@@ -15,6 +15,7 @@ import { SignInCredentialsDto } from './dto/signin-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { AuthGuard } from '@nestjs/passport';
+import { FileService } from 'src/files/file.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
+    private readonly databaseFilesService: FileService,
   ) {}
 
   async signUp(
@@ -80,5 +82,16 @@ export class AuthService {
   async getUsers(): Promise<User[]> {
     const users = await this.usersRepository.find();
     return users;
+  }
+
+  async addAvatar(userId: string, imageBuffer: Buffer, filename: string) {
+    const avatar = await this.databaseFilesService.uploadDatabaseFile(
+      imageBuffer,
+      filename,
+    );
+    await this.usersRepository.update(userId, {
+      avatarId: avatar.id,
+    });
+    return avatar;
   }
 }

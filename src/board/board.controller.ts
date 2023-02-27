@@ -45,7 +45,7 @@ export class BoardController {
     @Param('id') idBoard: string,
     @Body('userId') idUser: string,
     @GetUser() user: User,
-  ): Promise<void> {
+  ): Promise<User | void> {
     return this.boardService.addUserToBoardTeam(idUser, idBoard, user);
   }
 
@@ -53,7 +53,7 @@ export class BoardController {
   isPartOfBoardTeam(
     @GetUser() user: User,
     @Param('id') idBoard: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     console.log(user.id, idBoard);
     return this.boardService.isPartOfBoardTeam(user.id, idBoard);
   }
