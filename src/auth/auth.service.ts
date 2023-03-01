@@ -93,31 +93,34 @@ export class AuthService {
       const user = await queryRunner.manager.findOne(User, userId);
       const currentAvatarId = user.avatarId;
 
-      //add new avatar to files and update avatar id
-      const avatar = await this.databaseFilesService.uploadDatabaseFile(
-        imageBuffer,
-        filename,
-        queryRunner,
-      );
-      await queryRunner.manager.update(User, userId, {
-        avatarId: avatar.id,
-      });
-
-      //if an avatar already exists, delete it
+      //if an avatar already exists, update the image
       if (currentAvatarId) {
-        await this.databaseFilesService.deleteFile(
+        await this.databaseFilesService.updateDatabaseFile(
           currentAvatarId,
+          imageBuffer,
+          filename,
           queryRunner,
         );
+      } else {
+        //add new avatar to files and update avatar id
+        const avatar = await this.databaseFilesService.uploadDatabaseFile(
+          imageBuffer,
+          filename,
+          queryRunner,
+        );
+        await queryRunner.manager.update(User, userId, {
+          avatarId: avatar.id,
+        });
       }
 
       await queryRunner.commitTransaction();
 
-      return avatar;
+      return this.userExists(userId);
     } catch (err) {
       //rollback if something goes wrong
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException(err);
+      console.log(err);
+      throw new InternalServerErrorException();
     } finally {
       await queryRunner.release();
     }

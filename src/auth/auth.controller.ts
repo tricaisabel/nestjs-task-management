@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   UploadedFile,
@@ -26,6 +27,12 @@ export class AuthController {
   @UseGuards(AuthGuard())
   getAllUsers() {
     return this.authService.getUsers();
+  }
+
+  @Get('/users/:id')
+  @UseGuards(AuthGuard())
+  getUserById(@Param('id') id: string) {
+    return this.authService.userExists(id);
   }
 
   @Post('/signup')

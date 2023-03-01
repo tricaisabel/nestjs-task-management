@@ -23,6 +23,24 @@ export class FileService {
     return newFile;
   }
 
+  async updateDatabaseFile(
+    id: string,
+    dataBuffer: Buffer,
+    filename: string,
+    queryRunner: QueryRunner,
+  ) {
+    const existingFile = await queryRunner.manager.findOne(DatabaseFile, {
+      where: { id },
+    });
+
+    const newFile: DatabaseFile = {
+      id: existingFile.id,
+      filename,
+      data: dataBuffer,
+    };
+    await queryRunner.manager.save(DatabaseFile, newFile);
+  }
+
   async deleteFile(fileId: number, queryRunner: QueryRunner) {
     const deleteResponse = await queryRunner.manager.delete(
       DatabaseFile,

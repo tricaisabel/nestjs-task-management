@@ -45,7 +45,7 @@ export class User {
   public avatar?: DatabaseFile;
 
   @Column({ nullable: true })
-  public avatarId?: number;
+  public avatarId?: string;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
