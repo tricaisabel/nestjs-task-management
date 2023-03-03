@@ -14,6 +14,7 @@ import { SignInCredentialsDto } from './dto/signin-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { FileService } from 'src/files/file.service';
+import DatabaseFile from 'src/files/file.entity';
 
 @Injectable()
 export class AuthService {
@@ -91,26 +92,22 @@ export class AuthService {
 
     try {
       const user = await queryRunner.manager.findOne(User, userId);
-      const currentAvatarId = user.avatarId;
+      const oldAvatarId = user.avatarId;
 
-      //if an avatar already exists, update the image
-      if (currentAvatarId) {
-        await this.databaseFilesService.updateDatabaseFile(
-          currentAvatarId,
-          imageBuffer,
-          filename,
-          queryRunner,
-        );
-      } else {
-        //add new avatar to files and update avatar id
-        const avatar = await this.databaseFilesService.uploadDatabaseFile(
-          imageBuffer,
-          filename,
-          queryRunner,
-        );
-        await queryRunner.manager.update(User, userId, {
-          avatarId: avatar.id,
-        });
+      //add new avatar to files and update avatar id
+      const avatar = await this.databaseFilesService.uploadDatabaseFile(
+        imageBuffer,
+        filename,
+        queryRunner,
+      );
+
+      await queryRunner.manager.update(User, userId, {
+        avatarId: avatar.id,
+      });
+
+      //if avatar already existed delete the old one
+      if (oldAvatarId) {
+        await queryRunner.manager.delete(DatabaseFile, { id: oldAvatarId });
       }
 
       await queryRunner.commitTransaction();
