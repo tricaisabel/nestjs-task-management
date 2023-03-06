@@ -2,8 +2,11 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Req,
   UploadedFile,
@@ -54,7 +57,13 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('file'))
   async addAvatar(
     @GetUser() user: User,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        //less than 1 MB
+        validators: [new MaxFileSizeValidator({ maxSize: 1000 * 1000 })],
+      }),
+    )
+    file: Express.Multer.File,
   ) {
     return this.authService.addAvatar(user.id, file.buffer, file.originalname);
   }
