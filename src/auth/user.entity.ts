@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
-import { Board } from 'src/board/board.entity';
-import DatabaseFile from 'src/files/file.entity';
-import { Task } from 'src/tasks/task.entity';
+import { Board } from '../board/board.entity';
+import DatabaseFile from '../files/file.entity';
+import { Task } from '../tasks/task.entity';
 import {
   Column,
   Entity,

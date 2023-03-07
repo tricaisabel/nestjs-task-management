@@ -13,8 +13,8 @@ import * as bcrypt from 'bcrypt';
 import { SignInCredentialsDto } from './dto/signin-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
-import { FileService } from 'src/files/file.service';
-import DatabaseFile from 'src/files/file.entity';
+import { FileService } from '../files/file.service';
+import DatabaseFile from '../files/file.entity';
 
 @Injectable()
 export class AuthService {
