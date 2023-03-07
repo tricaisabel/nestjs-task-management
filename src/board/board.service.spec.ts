@@ -188,6 +188,3 @@ describe('BoardService', () => {
     });
   });
 });
-function params(...args: any[]): unknown {
-  throw new Error('Function not implemented.');
-}
