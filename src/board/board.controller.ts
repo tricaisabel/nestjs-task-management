@@ -14,7 +14,7 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../auth/user.entity';
 import { Board } from './board.entity';
 import { BoardService } from './board.service';
-import { CreateBoardDto } from './dto/create-board.dto';
+import { CreateBoardDto, GetBoardDto } from './dto/board.dto';
 
 @Controller('boards')
 @UseGuards(AuthGuard())
@@ -31,8 +31,12 @@ export class BoardController {
   }
 
   @Get()
-  getBoards(): Promise<Board[]> {
-    return this.boardService.getBoards();
+  getBoards(
+    @GetUser() user: User,
+    @Body() body: GetBoardDto,
+  ): Promise<Board[]> {
+    let fullSet = body.fullSet === 'true' ? true : false;
+    return this.boardService.getBoards(user, fullSet);
   }
 
   @Get('/:id')
@@ -54,7 +58,6 @@ export class BoardController {
     @GetUser() user: User,
     @Param('id') idBoard: string,
   ): Promise<boolean> {
-    console.log(user.id, idBoard);
     return this.boardService.isPartOfBoardTeam(user.id, idBoard);
   }
 }

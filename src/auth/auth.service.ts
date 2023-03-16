@@ -50,7 +50,7 @@ export class AuthService {
         //duplicate username
         throw new ConflictException('Username already exists');
       } else {
-        throw new InternalServerErrorException();
+        throw new InternalServerErrorException(error.message);
       }
     }
   }
@@ -116,7 +116,6 @@ export class AuthService {
     } catch (err) {
       //rollback if something goes wrong
       await queryRunner.rollbackTransaction();
-      console.log(err);
       throw new InternalServerErrorException();
     } finally {
       await queryRunner.release();

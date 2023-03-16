@@ -9,7 +9,8 @@ import { AuthService } from '../auth/auth.service';
 import { User } from '../auth/user.entity';
 import { Repository } from 'typeorm';
 import { Board } from './board.entity';
-import { CreateBoardDto } from './dto/create-board.dto';
+import { CreateBoardDto } from './dto/board.dto';
+import { Task } from 'src/tasks/task.entity';
 
 @Injectable()
 export class BoardService {
@@ -20,7 +21,6 @@ export class BoardService {
   ) {}
 
   async isPartOfBoardTeam(idUser: string, idBoard: string): Promise<boolean> {
-    console.log(idUser, idBoard);
     const board = await this.getBoardById(idBoard);
     const authUser = await this.authService.userExists(idUser);
     const found = board.team.find((user) => user.id === authUser.id);
@@ -60,11 +60,38 @@ export class BoardService {
     }
   }
 
-  async getBoards(): Promise<Board[]> {
-    const boards = await this.boardRepository.find({
+  async getBoards(user: User, fullSet: boolean): Promise<Board[]> {
+    if (!fullSet) {
+      const tasksSubquery = this.boardRepository
+        .createQueryBuilder()
+        .select('task.id')
+        .from(Task, 'task')
+        .leftJoin('task.createdBy', 'taskCreatedBy')
+        .where('task.boardId = board.id AND taskCreatedBy.id = :userId', {
+          userId: user.id,
+        })
+        .getQuery();
+
+      return this.boardRepository
+        .createQueryBuilder('board')
+        .leftJoinAndSelect('board.team', 'team')
+        .leftJoinAndSelect('board.createdBy', 'createdBy')
+        .leftJoinAndSelect(
+          'board.tasks',
+          'tasks',
+          `tasks.id IN (${tasksSubquery})`,
+        )
+        .leftJoinAndSelect('tasks.createdBy', 'taskCreatedBy')
+        .leftJoinAndSelect('tasks.assignedTo', 'assignedTo')
+        .where(
+          'team.id = :userId OR createdBy.id = :userId OR taskCreatedBy.id = :userId',
+          { userId: user.id },
+        )
+        .getMany();
+    }
+    return await this.boardRepository.find({
       relations: ['tasks', 'team'],
     });
-    return boards;
   }
 
   async addUserToBoardTeam(

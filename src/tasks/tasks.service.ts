@@ -136,7 +136,6 @@ export class TasksService {
   ): Promise<Task> {
     let task = await this.getTaskById(id);
     if (task) {
-      console.log(newProperties.assignedTo);
       if (newProperties.assignedTo !== 'Unassigned') {
         const user: User = await this.authService.userExists(
           newProperties.assignedTo,
